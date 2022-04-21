@@ -1,6 +1,6 @@
 import requests
 on = True
-API_key = "bf044259901182f5bd6bedefd9bfbd2b"
+API_key = "PASTE API KEY HERE"
 while on is True:
     print("""
   ___        _              ___                       _           
