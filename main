@@ -1,0 +1,94 @@
+import requests
+on = True
+API_key = "bf044259901182f5bd6bedefd9bfbd2b"
+while on is True:
+    print("""
+  ___        _              ___                       _           
+ | _ \___ __(_)_ __  ___   / __|___ _ _  ___ _ _ __ _| |_ ___ _ _ 
+ |   / -_) _| | '_ \/ -_) | (_ / -_) ' \/ -_) '_/ _` |  _/ _ \ '_|
+ |_|_\___\__|_| .__/\___|  \___\___|_||_\___|_| \__,_|\__\___/_|  
+              |_|                                                
+    
+Hello! Welcome to the recipe generator. 
+Don't know what to do with that odd ingredient at the back of the cupboard? 
+Enter it below to find it featured in a selection of delicious recipes!
+
+If you like a recipe, you can save it to your cookbook to view later. 
+
+Type 'view' to view your saved recipes, 'exit' to exit, or enter an ingredient to search.""")
+
+
+    ingredient = input("> ")
+
+    if ingredient == "view":
+        f = open("chosen_recipe", "r")
+        print(f.read())
+        (f.close())
+        ingredient = input("Now you can enter an ingredient to find a new recipe, or type 'exit' to exit the program.")
+    elif ingredient == "exit":
+        quit()
+    else:
+        pass
+
+    request_url = f"https://api.edamam.com/api/recipes/v2?type=public&q={ingredient}&app_id=0b0a433c&app_key={API_key}"
+    response = requests.get(request_url)
+
+    if response.status_code == 200:
+        data = response.json()
+        while data == {'from': 1, 'to': 0, 'count': 0, '_links': {}, 'hits': []}:
+            print("Ingredient not found. Please check the spelling, or else try something different.")
+            ingredient = input("> ")
+            request_url = f"https://api.edamam.com/api/recipes/v2?type=public&q={ingredient}&app_id=0b0a433c&app_key={API_key}"
+            response = requests.get(request_url)
+            data = response.json()
+        else:
+            print(f"Here is a list of available recipes containing {ingredient}.")
+            recipes = data['hits']
+            for item in recipes:
+                title = item['recipe']['label']
+                print(title)
+    else:
+        print("Something went wrong!")
+    selection = input("Which recipe would you like to know more about? ")
+
+    for item in recipes:
+        if item['recipe']['label'] == selection:
+            choice = item
+            diet_labels = choice['recipe']['dietLabels']
+            health_labels = choice['recipe']['healthLabels']
+            ingredient_lines = choice['recipe']['ingredientLines']
+            calories = choice['recipe']['calories']
+            share_url = choice['recipe']['shareAs']
+
+            print(f"""
+****************
+{selection}
+*****************
+    
+Calories: {calories}
+Ingredients:
+    """)
+            for line in ingredient_lines:
+                print(line)
+    print(f"""
+To find out more about this recipe, please visit: 
+{share_url}
+    """)
+    Happy = input("""Type 'save' to save this recipe to your cookbook and return to the main screen."
+Type 'quit' to quit.
+Type 'restart' to return to the main screen.""")
+    if Happy == "save":
+        f = open("chosen_recipe", "a")
+        f.write(f"""
+{selection}
+{share_url}""")
+        f.close()
+        print("A link to this recipe has been added to your recipe book.")
+        continue
+    if Happy == "quit":
+        on = False
+        break
+    else:
+        continue
+
+
